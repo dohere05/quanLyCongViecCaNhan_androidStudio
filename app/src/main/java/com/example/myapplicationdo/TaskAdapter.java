@@ -52,7 +52,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         holder.tvCategory.setText(task.getCategory());
         holder.tvPriority.setText(task.getPriority());
 
-        // Ưu tiên: đổi màu indicator và badge
         int priorityColor;
         int priorityBg;
         if ("Cao".equalsIgnoreCase(task.getPriority())) {
@@ -69,7 +68,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         holder.tvPriority.setTextColor(priorityColor);
         holder.tvPriority.setBackgroundResource(priorityBg);
 
-        // Trạng thái hoàn thành & Gạch ngang chữ (Strikethrough)
         holder.cbCompleted.setOnCheckedChangeListener(null);
         holder.cbCompleted.setChecked(task.isCompleted());
 
@@ -81,7 +79,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             holder.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.black));
         }
 
-        // Kiểm tra trễ hạn (overdue)
         long currentTime = System.currentTimeMillis();
         if (!task.isCompleted() && task.getDueTimestamp() > 0 && task.getDueTimestamp() < currentTime) {
             holder.tvDueDate.setTextColor(ContextCompat.getColor(context, R.color.overdue_red));
@@ -90,7 +87,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             holder.tvDueDate.setTextColor(ContextCompat.getColor(context, R.color.gray));
         }
 
-        // Sự kiện tick hoàn thành
         holder.cbCompleted.setOnCheckedChangeListener((buttonView, isChecked) -> {
             task.setIsCompleted(isChecked ? 1 : 0);
             if (isChecked) {
@@ -105,7 +101,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             }
         });
 
-        // Click xem chi tiết / sửa
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onTaskClick(task);

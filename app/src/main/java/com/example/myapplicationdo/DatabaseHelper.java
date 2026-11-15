@@ -6,8 +6,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -176,6 +182,107 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         db.close();
         return taskList;
+    }
+
+    // Lấy công việc theo khung thời gian (0: Tất cả, 1: 1 ngày, 2: 1 tuần, 3: 1 tháng, 4: 1 năm, 5: Hơn 1 năm)
+    public List<Task> getTasksByTimeRange(int timeRangeType) {
+        List<Task> taskList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        long now = System.currentTimeMillis();
+        long ONE_DAY_MS = 24L * 60 * 60 * 1000;
+        long ONE_WEEK_MS = 7L * ONE_DAY_MS;
+        long ONE_MONTH_MS = 30L * ONE_DAY_MS;
+        long ONE_YEAR_MS = 365L * ONE_DAY_MS;
+
+        StringBuilder query = new StringBuilder("SELECT * FROM " + TABLE_TASKS + " WHERE 1=1");
+        List<String> argsList = new ArrayList<>();
+
+        if (timeRangeType == 1) { // 1 ngày (24h gần nhất hoặc hôm nay)
+            query.append(" AND ").append(COLUMN_DUE_TIMESTAMP).append(" >= ? AND ").append(COLUMN_DUE_TIMESTAMP).append(" <= ?");
+            argsList.add(String.valueOf(now - ONE_DAY_MS));
+            argsList.add(String.valueOf(now + ONE_DAY_MS));
+        } else if (timeRangeType == 2) { // 1 tuần (7 ngày)
+            query.append(" AND ").append(COLUMN_DUE_TIMESTAMP).append(" >= ?");
+            argsList.add(String.valueOf(now - ONE_WEEK_MS));
+        } else if (timeRangeType == 3) { // 1 tháng (30 ngày)
+            query.append(" AND ").append(COLUMN_DUE_TIMESTAMP).append(" >= ?");
+            argsList.add(String.valueOf(now - ONE_MONTH_MS));
+        } else if (timeRangeType == 4) { // 1 năm (365 ngày)
+            query.append(" AND ").append(COLUMN_DUE_TIMESTAMP).append(" >= ?");
+            argsList.add(String.valueOf(now - ONE_YEAR_MS));
+        } else if (timeRangeType == 5) { // Hơn 1 năm
+            query.append(" AND ").append(COLUMN_DUE_TIMESTAMP).append(" < ?");
+            argsList.add(String.valueOf(now - ONE_YEAR_MS));
+        }
+
+        query.append(" ORDER BY ").append(COLUMN_DUE_TIMESTAMP).append(" ASC");
+
+        Cursor cursor = db.rawQuery(query.toString(), argsList.toArray(new String[0]));
+
+        if (cursor.moveToFirst()) {
+            do {
+                Task task = new Task(
+                        cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_DATE)),
+                        cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DUE_TIMESTAMP)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRIORITY)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED))
+                );
+                taskList.add(task);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return taskList;
+    }
+
+    // Tổng hợp Seri công việc theo tháng (Gộp các công việc theo từng Tháng/Năm)
+    public List<TaskSeries> getMonthlyTaskSeries() {
+        Map<String, TaskSeries> seriesMap = new LinkedHashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_TASKS + " ORDER BY " + COLUMN_DUE_TIMESTAMP + " DESC", null);
+        SimpleDateFormat sdf = new SimpleDateFormat("'Tháng' MM/yyyy", Locale.getDefault());
+
+        if (cursor.moveToFirst()) {
+            do {
+                Task task = new Task(
+                        cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_DATE)),
+                        cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DUE_TIMESTAMP)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRIORITY)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED))
+                );
+
+                String monthKey;
+                if (task.getDueTimestamp() > 0) {
+                    monthKey = sdf.format(new Date(task.getDueTimestamp()));
+                } else {
+                    monthKey = "Tháng Khác";
+                }
+
+                if (!seriesMap.containsKey(monthKey)) {
+                    seriesMap.put(monthKey, new TaskSeries(monthKey));
+                }
+
+                TaskSeries series = seriesMap.get(monthKey);
+                if (series != null) {
+                    series.addTask(task);
+                }
+
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+
+        return new ArrayList<>(seriesMap.values());
     }
 
     // Thống kê: Tổng số việc

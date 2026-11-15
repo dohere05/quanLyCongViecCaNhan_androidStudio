@@ -8,7 +8,7 @@ public class Task {
     private long dueTimestamp;
     private String priority;
     private String category;
-    private int isCompleted; // 0: chưa hoàn thành, 1: đã hoàn thành
+    private int isCompleted;
 
     public Task() {
     }

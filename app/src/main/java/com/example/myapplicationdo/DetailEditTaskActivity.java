@@ -64,12 +64,10 @@ public class DetailEditTaskActivity extends AppCompatActivity {
         spinnerPriority = findViewById(R.id.spinnerPriority);
         spinnerCategory = findViewById(R.id.spinnerCategory);
 
-        // Spinner Ưu tiên
         String[] priorities = {"Cao", "Trung bình", "Thấp"};
         ArrayAdapter<String> priorityAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, priorities);
         spinnerPriority.setAdapter(priorityAdapter);
 
-        // Spinner Danh mục
         String[] categories = {"Học tập", "Cá nhân", "Công việc"};
         ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categories);
         spinnerCategory.setAdapter(categoryAdapter);
@@ -114,7 +112,6 @@ public class DetailEditTaskActivity extends AppCompatActivity {
         }
         updateDateTimeLabel();
 
-        // Set spinner selection
         if ("Cao".equalsIgnoreCase(currentTask.getPriority())) {
             spinnerPriority.setSelection(0);
         } else if ("Thấp".equalsIgnoreCase(currentTask.getPriority())) {

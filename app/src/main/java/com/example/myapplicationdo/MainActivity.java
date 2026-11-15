@@ -7,17 +7,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -40,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     private EditText etSearch;
     private ChipGroup chipGroupStatus;
     private Spinner spinnerCategoryFilter;
-    private FloatingActionButton fabAddTask;
+    private FloatingActionButton fabAddTask, fabStatistics;
 
     private DatabaseHelper dbHelper;
     private TaskAdapter taskAdapter;
@@ -55,7 +51,6 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Đăng ký cấp quyền thông báo nếu dùng Android 13+
         requestNotificationPermission();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -70,18 +65,16 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         chipGroupStatus = findViewById(R.id.chipGroupStatus);
         spinnerCategoryFilter = findViewById(R.id.spinnerCategoryFilter);
         fabAddTask = findViewById(R.id.fabAddTask);
+        fabStatistics = findViewById(R.id.fabStatistics);
 
-        // Thiết lập RecyclerView
         rvTasks.setLayoutManager(new LinearLayoutManager(this));
         taskAdapter = new TaskAdapter(this, taskList, this);
         rvTasks.setAdapter(taskAdapter);
 
-        // Cấu hình Spinner Danh mục
         String[] categories = {"Tất cả", "Học tập", "Cá nhân", "Công việc"};
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categories);
         spinnerCategoryFilter.setAdapter(spinnerAdapter);
 
-        // Sự kiện lọc Danh mục
         spinnerCategoryFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -94,7 +87,6 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
             }
         });
 
-        // Sự kiện lọc Trạng thái (ChipGroup)
         chipGroupStatus.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.chipDone) {
                 currentStatusFilter = "DONE";
@@ -106,7 +98,6 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
             loadTasks();
         });
 
-        // Sự kiện Tìm kiếm
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -123,7 +114,13 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
             }
         });
 
-        // Nút thêm mới công việc
+        // Nút xem Thống Kê (nằm ngay trên nút +)
+        fabStatistics.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, StatisticsActivity.class);
+            startActivity(intent);
+        });
+
+        // Nút thêm công việc mới (+)
         fabAddTask.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, AddTaskActivity.class);
             startActivity(intent);
@@ -147,22 +144,6 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
             tvEmpty.setVisibility(View.GONE);
             rvTasks.setVisibility(View.VISIBLE);
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_statistics) {
-            Intent intent = new Intent(MainActivity.this, StatisticsActivity.class);
-            startActivity(intent);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -52,24 +52,19 @@ public class AddTaskActivity extends AppCompatActivity {
         spinnerPriority = findViewById(R.id.spinnerPriority);
         spinnerCategory = findViewById(R.id.spinnerCategory);
 
-        // Thiết lập Spinner Ưu tiên
         String[] priorities = {"Cao", "Trung bình", "Thấp"};
         ArrayAdapter<String> priorityAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, priorities);
         spinnerPriority.setAdapter(priorityAdapter);
         spinnerPriority.setSelection(1); // Mặc định Trung bình
 
-        // Thiết lập Spinner Danh mục
         String[] categories = {"Học tập", "Cá nhân", "Công việc"};
         ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categories);
         spinnerCategory.setAdapter(categoryAdapter);
 
-        // Nút chọn Ngày
         btnSelectDate.setOnClickListener(v -> showDatePicker());
 
-        // Nút chọn Giờ
         btnSelectTime.setOnClickListener(v -> showTimePicker());
 
-        // Nút Lưu
         btnSaveTask.setOnClickListener(v -> saveTask());
 
         updateDateTimeLabel();
@@ -140,7 +135,6 @@ public class AddTaskActivity extends AppCompatActivity {
 
         if (id > 0) {
             task.setId((int) id);
-            // Lên lịch nhắc nhở qua AlarmManager
             NotificationReceiver.scheduleNotification(this, task);
 
             Toast.makeText(this, "Thêm công việc mới thành công!", Toast.LENGTH_SHORT).show();

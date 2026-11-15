@@ -107,7 +107,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:paddingBottom="80dp" />
+                android:paddingBottom="140dp" />
 
             <!-- Thông báo khi danh sách trống -->
             <TextView
@@ -127,16 +127,38 @@
 
     </LinearLayout>
 
-    <!-- Nút thêm công việc FAB -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddTask"
+    <!-- Nhóm nút bấm thao tác ở góc dưới bên phải -->
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"
-        android:contentDescription="Thêm công việc mới"
-        android:src="@drawable/ic_add"
-        app:backgroundTint="@color/primary"
-        app:tint="@color/white" />
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <!-- Nút Thống Kê FAB (nằm trên nút +) -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabStatistics"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="14dp"
+            android:contentDescription="Xem thống kê"
+            android:src="@drawable/ic_stats"
+            app:backgroundTint="#7E57C2"
+            app:fabSize="normal"
+            app:tint="@color/white" />
+
+        <!-- Nút Thêm Công Việc FAB (+) -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabAddTask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="Thêm công việc mới"
+            android:src="@drawable/ic_add"
+            app:backgroundTint="@color/primary"
+            app:fabSize="normal"
+            app:tint="@color/white" />
+
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
